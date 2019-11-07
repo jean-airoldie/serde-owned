@@ -199,7 +199,7 @@ fn derive_proxy_named_struct(
                 }
             }
 
-            fn into_proxy(self) -> Self::Proxy {
+            unsafe fn into_proxy(self) -> Self::Proxy {
                 Self::Proxy {
                     #(#into_proxy_fields),*
                 }
@@ -272,7 +272,7 @@ fn derive_proxy_unnamed_struct(
                 )
             }
 
-            fn into_proxy(self) -> Self::Proxy {
+            unsafe fn into_proxy(self) -> Self::Proxy {
                 #proxy_ident (
                     #(#into_proxy_fields),*
                 )
@@ -407,7 +407,7 @@ fn derive_proxy_enum(
                 }
             }
 
-            fn into_proxy(self) -> Self::Proxy {
+            unsafe fn into_proxy(self) -> Self::Proxy {
                 match self {
                     #(#into_proxy_fields),*
                 }

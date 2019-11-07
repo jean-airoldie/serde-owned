@@ -161,7 +161,7 @@ mod enum_ {
 mod krate {
     #[test]
     fn serde_crate() {
-        use panini::{DeserializeFrom, SerdeOwned, SerializeInto};
+        use panini::{DeserializeFrom, SerializeInto};
         use serde_owned as panini;
         use serde_owned_derive::SerdeOwned;
 
