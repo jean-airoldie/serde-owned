@@ -77,7 +77,7 @@ fn get_lit_str2(
         Ok(lit)
     } else {
         Err(format!(
-            "expected serde_proxy {} attribute to be a string: `{} = \"...\"`",
+            "expected serde_owned {} attribute to be a string: `{} = \"...\"`",
             attr_name, meta_item_name
         ))
     }
@@ -107,7 +107,7 @@ fn serde_bound(ty: &syn::Type, krate: &Ident) -> TokenStream2 {
 }
 
 struct Helpers {
-    // serde_proxy krate identifier.
+    // serde_owned crate identifier.
     krate: Option<Ident>,
 }
 
@@ -122,7 +122,7 @@ impl Helpers {
             .flatten()
         {
             match &meta_item {
-                // Parse `#[serde_proxy(krate = "foo")]`
+                // Parse `#[serde_owned(krate = "foo")]`
                 Meta(NameValue(m)) if m.path == CRATE => {
                     let s = get_lit_str(CRATE, &m.lit).unwrap();
                     let ident = format_ident!("{}", &s.value());
