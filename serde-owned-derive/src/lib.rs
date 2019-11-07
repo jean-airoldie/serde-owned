@@ -139,9 +139,10 @@ impl Helpers {
 
 fn derive_proxy_named_struct(
     krate: &Ident,
-    generics: &syn::Generics,
+    vis: &syn::Visibility,
     ident: &Ident,
     proxy_ident: &Ident,
+    generics: &syn::Generics,
     fields: syn::FieldsNamed,
 ) -> TokenStream2 {
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -166,7 +167,8 @@ fn derive_proxy_named_struct(
         #[derive(#krate::serde::Serialize, #krate::serde::Deserialize)]
         #[serde(crate = #serde_crate_str)]
         #[allow(non_camel_case_types)]
-        struct #proxy_ident #ty_generics #where_clause {
+        #[doc(hidden)]
+        #vis struct #proxy_ident #ty_generics #where_clause {
             #(#proxy_fields),*
         }
     };
@@ -215,9 +217,10 @@ fn derive_proxy_named_struct(
 
 fn derive_proxy_unnamed_struct(
     krate: &Ident,
-    generics: &syn::Generics,
+    vis: &syn::Visibility,
     ident: &Ident,
     proxy_ident: &Ident,
+    generics: &syn::Generics,
     fields: syn::FieldsUnnamed,
 ) -> TokenStream2 {
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
@@ -241,7 +244,8 @@ fn derive_proxy_unnamed_struct(
         #[derive(#krate::serde::Serialize, #krate::serde::Deserialize)]
         #[serde(crate = #serde_crate_str)]
         #[allow(non_camel_case_types)]
-        struct #proxy_ident #ty_generics (
+        #[doc(hidden)]
+        #vis struct #proxy_ident #ty_generics (
             #(#proxy_fields),*
         ) #where_clause;
     };
@@ -288,17 +292,18 @@ fn derive_proxy_unnamed_struct(
 
 fn derive_proxy_struct(
     krate: &Ident,
-    generics: &syn::Generics,
+    vis: &syn::Visibility,
     ident: &Ident,
     proxy_ident: &Ident,
+    generics: &syn::Generics,
     data: syn::DataStruct,
 ) -> TokenStream2 {
     match data.fields {
         Fields::Named(fields) => {
-            derive_proxy_named_struct(krate, generics, ident, proxy_ident, fields)
+            derive_proxy_named_struct(krate, vis, ident, proxy_ident, generics, fields)
         }
         Fields::Unnamed(fields) => {
-            derive_proxy_unnamed_struct(krate, generics, ident, proxy_ident, fields)
+            derive_proxy_unnamed_struct(krate, vis, ident, proxy_ident, generics, fields)
         }
         Fields::Unit => unimplemented!(),
     }
@@ -306,9 +311,10 @@ fn derive_proxy_struct(
 
 fn derive_proxy_enum(
     krate: &Ident,
-    generics: &syn::Generics,
+    vis: &syn::Visibility,
     ident: &Ident,
     proxy_ident: &Ident,
+    generics: &syn::Generics,
     data: syn::DataEnum,
 ) -> TokenStream2 {
     let proxy_fields: Vec<TokenStream2> = data
@@ -350,7 +356,8 @@ fn derive_proxy_enum(
         #[derive(#krate::serde::Serialize, #krate::serde::Deserialize)]
         #[serde(crate = #serde_crate_str)]
         #[allow(non_camel_case_types)]
-        enum #proxy_ident #ty_generics #where_clause {
+        #[doc(hidden)]
+        #vis enum #proxy_ident #ty_generics #where_clause {
             #(#proxy_fields),*
         }
     };
@@ -434,11 +441,12 @@ pub fn serde_owned(input: TokenStream) -> TokenStream {
 
     let generics = ast.generics;
     let ident = ast.ident;
+    let vis = ast.vis;
     let proxy_ident = format_ident!("_SERDE_PROXY_FOR_{}", ident);
 
     let impl_ = match ast.data {
-        Data::Struct(data) => derive_proxy_struct(&krate, &generics, &ident, &proxy_ident, data),
-        Data::Enum(data) => derive_proxy_enum(&krate, &generics, &ident, &proxy_ident, data),
+        Data::Struct(data) => derive_proxy_struct(&krate, &vis, &ident, &proxy_ident, &generics, data),
+        Data::Enum(data) => derive_proxy_enum(&krate, &vis, &ident, &proxy_ident, &generics, data),
         Data::Union(_data) => unimplemented!(),
     };
 
