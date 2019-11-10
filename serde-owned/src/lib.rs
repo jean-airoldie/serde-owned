@@ -100,6 +100,9 @@ pub trait SerializeInto: Sized {
 
 /// Deserialization that is safe in case of exclusive ownership.
 pub trait DeserializeFrom: Sized {
+    /// The caller must make sure that he is the exclusive owner of the
+    /// serialized bytes. He must also ensure that these bytes are not leaked
+    /// upon success, so that the `T` can't be duplicated.
     unsafe fn deserialize_from<'de, D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>;
@@ -129,9 +132,6 @@ impl<T> DeserializeFrom for T
 where
     T: SerdeOwned,
 {
-    /// The caller must make sure that he is the exclusive owner of the
-    /// serialized bytes. He must also ensure that these bytes are not leaked
-    /// upon success, so that the `T` can't be duplicated.
     unsafe fn deserialize_from<'de, D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>,
